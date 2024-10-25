@@ -151,9 +151,9 @@ class PfSense:
         return response.status_code == 200
     
 if __name__ == "__main__":
-    HOST = "192.168.2.2"
-    USERNAME = "admin"
-    PASSWORD = "lenhung"
+    HOST = ""
+    USERNAME = ""
+    PASSWORD = ""
 
     pfsense = PfSense(HOST, USERNAME, PASSWORD)
 
