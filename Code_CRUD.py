@@ -18,7 +18,7 @@ class PfSense:
             return True
         else:
             return False
-
+            
     def read_rules(self):
         read_url = f"https://{self.host}/api/v2/firewall/rules" 
         response = self.session.get(read_url, auth=(self.username, self.password))
