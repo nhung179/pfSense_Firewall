@@ -6,15 +6,16 @@ import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 class PfSense:
-    def __init__(self, host, username, password):
+    def __init__(self, host, username, password, port):
         self.host = host
         self.username = username
         self.password = password
+        self.port = port 
         self.session = requests.Session()
         self.session.verify = False
 
     def http_request(self, method, endpoint, data=None, params=None):
-        url = f"https://{self.host}:9080{endpoint}"
+        url = f"https://{self.host}:{self.port}{endpoint}"
         response = self.session.request(method=method, url=url, json=data, params=params, auth=(self.username, self.password))
         return response if response.status_code == 200 else None
 
@@ -56,7 +57,12 @@ def main():
     command = demisto.command()
 
     rule_id = args.get('rule_id')
-    pfsense = PfSense(params.get('host'), params.get('username'), params.get('password'))
+    host = params.get('host')
+    username = params.get('username')
+    password = params.get('password')
+    port = params.get('port')
+
+    pfsense = PfSense(host, username, password, port)
 
     try:
         if command == 'test-module':
