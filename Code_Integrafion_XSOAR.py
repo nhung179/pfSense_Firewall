@@ -14,8 +14,8 @@ class PfSense:
         self.session = requests.Session()
         self.session.verify = False
 
-    def http_request(self, method, endpoint, data=None, params=None):
-        url = f"https://{self.host}:{self.port}{endpoint}"
+    def http_request(self, method, path, data=None, params=None):
+        url = f"https://{self.host}:{self.port}{path}"
         response = self.session.request(method=method, url=url, json=data, params=params, auth=(self.username, self.password))
         return response if response.status_code == 200 else None
 
