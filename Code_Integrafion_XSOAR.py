@@ -63,7 +63,7 @@ def main():
     port = params.get('port')
 
     pfsense = PfSense(host, username, password, port)
-
+    
     try:
         if command == 'test-module':
             result = pfsense.login()
