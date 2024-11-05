@@ -63,23 +63,23 @@ def main():
     port = params.get('port')
 
     pfsense = PfSense(host, username, password, port)
-
+    
     try:
         if command == 'test-module':
             result = pfsense.login()
             if result == "Success":
                 return_results('ok')
-        elif command == 'read-rules':
+        elif command == 'pfsense-read-rules':
             return_results(pfsense.read_rules())
-        elif command == 'create-rule':
+        elif command == 'pfsense-create-rule':
             data = pfsense.input_data(args)
             return_results(pfsense.create_rule(data))
-        elif command == 'update-rule':
+        elif command == 'pfsense-update-rule':
             data = pfsense.input_data(args)
             return_results(pfsense.update_rule(data))
-        elif command == 'delete-rule':
+        elif command == 'pfsense-delete-rule':
             return_results(pfsense.delete_rule(rule_id))
-        elif command == 'replace-rules':
+        elif command == 'pfsense-replace-rules':
             data = [pfsense.input_data(args)]
             return_results(pfsense.replace_rules(data))
     except Exception as e:
