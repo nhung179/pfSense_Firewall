@@ -14,20 +14,25 @@ class PfSense:
         self.session = requests.Session()
         self.session.verify = False
 
-    def http_request(self, method, path, data=None, params=None):
+    def http_request(self, method, path, data=None):
         url = f"https://{self.host}:{self.port}{path}"
-        response = self.session.request(method=method, url=url, json=data, params=params, auth=(self.username, self.password))
+        response = self.session.request(method=method, url=url, json=data, auth=(self.username, self.password))
         return response if response.status_code == 200 else None
 
     def login(self):
         return "Success" if self.http_request('GET', '/index.php') else "Failed"
 
     def get_rules(self, rule_id):
-        if rule_id:
-            response = self.http_request('GET', '/api/v2/firewall/rule', params={'id': rule_id})
-        else:
-            response = self.http_request('GET', '/api/v2/firewall/rules')
-        return response.json() if response else None
+        try:
+            if rule_id:
+                path="/api/v2/firewall/rule/?id=" + rule_id
+            else:
+                path="/api/v2/firewall/rules"
+            response = self.http_request('GET', path)
+            return response.json() if response else None
+        except Exception as e:
+            print(f"An error occurred: {e}")
+            return None
 
     def create_rule(self, data_rule):
         response = self.http_request('POST', '/api/v2/firewall/rule', data=data_rule)
@@ -37,21 +42,31 @@ class PfSense:
         return bool(self.http_request('PATCH', '/api/v2/firewall/rule', data=data_rule))
 
     def delete_rules(self, rule_id):
-        if rule_id:
-            return bool(self.http_request('DELETE', f'/api/v2/firewall/rule/', params={'id': rule_id}))
-        else:
-             #WARNING: This will delete all objects that match the query, use with caution.
-             return bool(self.http_request('DELETE', f'/api/v2/firewall/rules'))
+        try:
+            if rule_id:
+                path="/api/v2/firewall/rule/?id=" + rule_id
+            else:
+                #WARNING: This will delete all objects that match the query, use with caution.
+                path="/api/v2/firewall/rules"
+            return bool(self.http_request('DELETE', path))
+        except Exception as e:
+            print(f"An error occurred: {e}")
+            return None
 
     def replace_rules(self, data_rule):
         return bool(self.http_request('PUT', '/api/v2/firewall/rules', data=data_rule))
 
     def get_aliases(self, alias_id):
-        if alias_id:
-            response = self.http_request('GET', '/api/v2/firewall/alias', params={'id': alias_id})
-        else:
-            response = self.http_request('GET', '/api/v2/firewall/aliases')
-        return response.json() if response else None
+        try:
+            if rule_id:
+                path="/api/v2/firewall/alias/?id=" + alias_id
+            else:
+                path="/api/v2/firewall/aliases"
+            response = self.http_request('GET', path)
+            return response.json() if response else None
+        except Exception as e:
+            print(f"An error occurred: {e}")
+            return None
 
     def create_alias(self, data_alias):
         response = self.http_request('POST', '/api/v2/firewall/alias', data=data_alias)
@@ -61,11 +76,16 @@ class PfSense:
         return bool(self.http_request('PATCH', '/api/v2/firewall/alias', data=data_alias))
 
     def delete_aliases(self, alias_id):
-        if alias_id:
-            return bool(self.http_request('DELETE', f'/api/v2/firewall/alias/', params={'id': alias_id}))
-        else:
-             #WARNING: This will delete all objects that match the query, use with caution.
-             return bool(self.http_request('DELETE', f'/api/v2/firewall/aliases'))
+        try:
+            if rule_id:
+                path="/api/v2/firewall/alias/?id=" + alias_id
+            else:
+                #WARNING: This will delete all objects that match the query, use with caution.
+                path="/api/v2/firewall/aliases"
+            return bool(self.http_request('DELETE', path))
+        except Exception as e:
+            print(f"An error occurred: {e}")
+            return None
 
     def replace_rules(self, data_alias):
         return bool(self.http_request('PUT', '/api/v2/firewall/rules', data=data_alias))
@@ -104,7 +124,7 @@ def main():
             if result == "Success":
                 return_results('ok')
         elif command == 'pfsense-get-rules':
-            return_results(pfsense.get_rules())
+            return_results(pfsense.get_rules(rule_id))
         elif command == 'pfsense-create-rule':
             data_rule = pfsense.input_data(args, is_rule=True)
             return_results(pfsense.create_rule(data_rule))
