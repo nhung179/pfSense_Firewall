@@ -19,9 +19,12 @@ class PfSense:
         else:
             return False
             
-    def read_rules(self):
-        read_url = f"https://{self.host}/api/v2/firewall/rules" 
-        response = self.session.get(read_url, auth=(self.username, self.password))
+    def get_rules(self, rule_id):
+        if rule_id:
+            url = f"https://{self.host}/api/v2/firewall/rule/?id={rule_id}"
+        else:
+            url = f"https://{self.host}/api/v2/firewall/rules" 
+        response = self.session.get(url, auth=(self.username, self.password))
         if response.status_code == 200:
             rules = response.json()
             return rules
@@ -41,7 +44,7 @@ class PfSense:
             "source_port": "80",
             "destination": "any",
             "destination_port": "80",
-            "descr": "Default allow LAN3 to any rule",
+            "descr": "Create 1 rule",
             "disabled": False,
             "log": False,
             "statetype": "keep state",
@@ -62,8 +65,12 @@ class PfSense:
         return response.status_code == 200
            
     def delete_rule(self, rule_id):
-        delete_url = f"https://{self.host}/api/v2/firewall/rule/?id={rule_id}"
-        response = self.session.delete(delete_url, auth=(self.username, self.password))
+        if rule_id:
+            url =  f"https://{self.host}/api/v2/firewall/rule/?id={rule_id}"
+        else: 
+            #WARNING: This will delete all objects that match the query, use with caution.
+            url = f"https://{self.host}/api/v2/firewall/rules"
+        response = self.session.delete(url, auth=(self.username, self.password))
         if response.status_code == 200:
             return True
         else:
@@ -142,25 +149,29 @@ if __name__ == "__main__":
 
     if pfsense.login():
         print("Login successful")
-        rules = pfsense.read_rules()
+        rule_id = input("Enter the rule ID to read: ")
+        rules = pfsense.get_rules(rule_id)
         if rules:
             print(json.dumps(rules, indent=4))
+        else:
+            print(f"Failed to read alias with ID {rule_id}.")
         if pfsense.create_rule():
             print("Rule created successfully.")
         else:
             print("Failed to create rule")
-        # rule_id = input("Enter the rule ID to delete: ")
-        # if pfsense.delete_rule(rule_id):
-        #     print(f"Rule with ID {rule_id} deleted successfully.")
-        # else:
-        #     print(f"Failed to delete rule with ID {rule_id}.")
+        rule_id = input("Enter the rule ID to delete: ")
+        if pfsense.delete_rule(rule_id):
+            print(f"Rule with ID {rule_id} deleted successfully.")
+        else:
+            print(f"Failed to delete rule with ID {rule_id}.")
         if pfsense.update_rule():
             print("Rule updated successfully.")
         else:
             print("Failed to update rule")
-        # if pfsense.replace_rule():
-        #     print("Rule replaced successfully.")
-        # else:
-        #     print("Failed to replace rule")
+        if pfsense.replace_rule():
+            print("Rule replaced successfully.")
+        else:
+            print("Failed to replace rule")
     else:
         print("Failed login")
+        
