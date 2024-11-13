@@ -87,10 +87,9 @@ class PfSense:
             print(f"An error occurred: {e}")
             return None
 
-    def replace_rules(self, data_alias):
-        return bool(self.http_request('PUT', '/api/v2/firewall/rules', data=data_alias))
+    def replace_aliases(self, data_alias):
+        return bool(self.http_request('PUT', '/api/v2/firewall/aliases', data=data_alias))
 
-    # Define input data
     def input_data(self, args, is_rule=True):
         if is_rule:
             fields = ["id", "type", "ipprotocol", "protocol", "source", "source_port", "destination", "destination_port", "descr", "statetype", "direction"]
