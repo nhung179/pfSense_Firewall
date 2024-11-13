@@ -67,10 +67,9 @@ class PfSense:
             demisto.error(f"{e}")
             return None
 
-
     def get_aliases(self, alias_id):
         try:
-            if rule_id:
+            if alias_id:
                 path="/api/v2/firewall/alias/?id=" + alias_id
             else:
                 path="/api/v2/firewall/aliases"
@@ -97,14 +96,14 @@ class PfSense:
 
     def delete_aliases(self, alias_id):
         try:
-            if rule_id:
+            if alias_id:
                 path="/api/v2/firewall/alias/?id=" + alias_id
             else:
                 path="/api/v2/firewall/aliases"
             return bool(self.http_request('DELETE', path))
         except Exception as e:
             demisto.error(f"{e}")
-            return Nonereturn_error(<message>)
+            return None
 
     def replace_aliases(self, data_alias):
         try:
@@ -113,7 +112,6 @@ class PfSense:
             demisto.error(f"{e}")
             return None
 
-    # Define input data
     def input_data(self, args, is_rule=True):
         if is_rule:
             fields = ["id", "type", "ipprotocol", "protocol", "source", "source_port", "destination", "destination_port", "descr", "statetype", "direction"]
