@@ -31,30 +31,42 @@ class PfSense:
             response = self.http_request('GET', path)
             return response.json() if response else None
         except Exception as e:
-            print(f"An error occurred: {e}")
+            demisto.error(f"{e}")
             return None
 
     def create_rule(self, data_rule):
-        response = self.http_request('POST', '/api/v2/firewall/rule', data=data_rule)
-        return response.json() if response else None
+        try:
+            response = self.http_request('POST', '/api/v2/firewall/rule', data=data_rule)
+            return response.json() if response else None
+        except Exception as e:
+            demisto.error(f"{e}")
+            return None
 
     def update_rule(self, data_rule):
-        return bool(self.http_request('PATCH', '/api/v2/firewall/rule', data=data_rule))
+        try:
+            return bool(self.http_request('PATCH', '/api/v2/firewall/rule', data=data_rule))
+        except Exception as e:
+            demisto.error(f"{e}")
+            return None
 
     def delete_rules(self, rule_id):
         try:
             if rule_id:
                 path="/api/v2/firewall/rule/?id=" + rule_id
             else:
-                #WARNING: This will delete all objects that match the query, use with caution.
                 path="/api/v2/firewall/rules"
             return bool(self.http_request('DELETE', path))
         except Exception as e:
-            print(f"An error occurred: {e}")
+            demisto.error(f"{e}")
             return None
 
     def replace_rules(self, data_rule):
-        return bool(self.http_request('PUT', '/api/v2/firewall/rules', data=data_rule))
+        try:
+            return bool(self.http_request('PUT', '/api/v2/firewall/rules', data=data_rule))
+        except Exception as e:
+            demisto.error(f"{e}")
+            return None
+
 
     def get_aliases(self, alias_id):
         try:
@@ -65,31 +77,43 @@ class PfSense:
             response = self.http_request('GET', path)
             return response.json() if response else None
         except Exception as e:
-            print(f"An error occurred: {e}")
+            demisto.error(f"{e}")
             return None
 
     def create_alias(self, data_alias):
-        response = self.http_request('POST', '/api/v2/firewall/alias', data=data_alias)
-        return response.json() if response else None
+        try:
+            response = self.http_request('POST', '/api/v2/firewall/alias', data=data_alias)
+            return response.json() if response else None
+        except Exception as e:
+            demisto.error(f"{e}")
+            return None
 
     def update_alias(self, data_alias):
-        return bool(self.http_request('PATCH', '/api/v2/firewall/alias', data=data_alias))
+        try:
+            return bool(self.http_request('PATCH', '/api/v2/firewall/alias', data=data_alias))
+        except Exception as e:
+            demisto.error(f"{e}")
+            return None
 
     def delete_aliases(self, alias_id):
         try:
             if rule_id:
                 path="/api/v2/firewall/alias/?id=" + alias_id
             else:
-                #WARNING: This will delete all objects that match the query, use with caution.
                 path="/api/v2/firewall/aliases"
             return bool(self.http_request('DELETE', path))
         except Exception as e:
-            print(f"An error occurred: {e}")
+            demisto.error(f"{e}")
             return None
 
     def replace_aliases(self, data_alias):
-        return bool(self.http_request('PUT', '/api/v2/firewall/aliases', data=data_alias))
+        try:
+            return bool(self.http_request('PUT', '/api/v2/firewall/aliases', data=data_alias))
+        except Exception as e:
+            demisto.error(f"{e}")
+            return None
 
+    # Define input data
     def input_data(self, args, is_rule=True):
         if is_rule:
             fields = ["id", "type", "ipprotocol", "protocol", "source", "source_port", "destination", "destination_port", "descr", "statetype", "direction"]
