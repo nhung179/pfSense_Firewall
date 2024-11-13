@@ -104,7 +104,7 @@ class PfSense:
             return bool(self.http_request('DELETE', path))
         except Exception as e:
             demisto.error(f"{e}")
-            return None
+            return Nonereturn_error(<message>)
 
     def replace_aliases(self, data_alias):
         try:
@@ -124,7 +124,6 @@ class PfSense:
 
         data = {field: args.get(field) for field in fields}
         data.update({field: [args.get(field)] for field in list_fields})
-
         return data
 
 def main():
@@ -159,7 +158,6 @@ def main():
         elif command == 'pfsense-replace-rules':
             data_rule = pfsense.input_data(args, is_rule=True)
             return_results(pfsense.replace_rules(data_rule))
-
         elif command == 'pfsense-get-aliases':
             return_results(pfsense.get_aliases(alias_id))
         elif command == 'pfsense-create-alias':
