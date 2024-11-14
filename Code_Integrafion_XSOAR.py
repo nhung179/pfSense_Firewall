@@ -2,8 +2,19 @@ register_module_line('pfSense_Firewall', 'start', __line__())
 
 import requests
 import json
+from functools import wraps
 import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
+def handle_errors(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except Exception as e:
+            demisto.error(f"Error in {func.__name__}: {e}")
+            return None
+    return wrapper
 
 class PfSense:
     def __init__(self, host, username, password, port):
@@ -19,101 +30,58 @@ class PfSense:
         response = self.session.request(method=method, url=url, json=data, auth=(self.username, self.password))
         return response if response.status_code == 200 else None
 
+    @handle_errors
     def login(self):
         return "Success" if self.http_request('GET', '/index.php') else "Failed"
 
+    @handle_errors
     def get_rules(self, rule_id):
-        try:
-            if rule_id:
-                path="/api/v2/firewall/rule/?id=" + rule_id
-            else:
-                path="/api/v2/firewall/rules"
-            response = self.http_request('GET', path)
-            return response.json() if response else None
-        except Exception as e:
-            demisto.error(f"{e}")
-            return None
+        path = f"/api/v2/firewall/rule/?id={rule_id}" if alias_id else "/api/v2/firewall/rules"
+        response = self.http_request('GET', path)
+        return response.json() if response else None
 
+    @handle_errors
     def create_rule(self, data_rule):
-        try:
-            response = self.http_request('POST', '/api/v2/firewall/rule', data=data_rule)
-            return response.json() if response else None
-        except Exception as e:
-            demisto.error(f"{e}")
-            return None
+        response = self.http_request('POST', '/api/v2/firewall/rule', data=data_rule)
+        return response.json() if response else None
 
+    @handle_errors
     def update_rule(self, data_rule):
-        try:
-            return bool(self.http_request('PATCH', '/api/v2/firewall/rule', data=data_rule))
-        except Exception as e:
-            demisto.error(f"{e}")
-            return None
+        return bool(self.http_request('PATCH', '/api/v2/firewall/rule', data=data_rule))
 
+    @handle_errors
     def delete_rules(self, rule_id):
-        try:
-            if rule_id:
-                path="/api/v2/firewall/rule/?id=" + rule_id
-            else:
-                path="/api/v2/firewall/rules"
-            return bool(self.http_request('DELETE', path))
-        except Exception as e:
-            demisto.error(f"{e}")
-            return None
+        path = f"/api/v2/firewall/rule/?id={rule_id}" if rule_id else "/api/v2/firewall/rules"
+        return bool(self.http_request('DELETE', path))
 
+    @handle_errors
     def replace_rules(self, data_rule):
-        try:
-            return bool(self.http_request('PUT', '/api/v2/firewall/rules', data=data_rule))
-        except Exception as e:
-            demisto.error(f"{e}")
-            return None
+        return bool(self.http_request('PUT', '/api/v2/firewall/rules', data=data_rule))
 
-
+    @handle_errors
     def get_aliases(self, alias_id):
-        try:
-            if rule_id:
-                path="/api/v2/firewall/alias/?id=" + alias_id
-            else:
-                path="/api/v2/firewall/aliases"
-            response = self.http_request('GET', path)
-            return response.json() if response else None
-        except Exception as e:
-            demisto.error(f"{e}")
-            return None
+        path = f"/api/v2/firewall/alias/?id={alias_id}" if alias_id else "/api/v2/firewall/aliases"
+        response = self.http_request('GET', path)
+        return response.json() if response else None
 
+    @handle_errors
     def create_alias(self, data_alias):
-        try:
-            response = self.http_request('POST', '/api/v2/firewall/alias', data=data_alias)
-            return response.json() if response else None
-        except Exception as e:
-            demisto.error(f"{e}")
-            return None
+        response = self.http_request('POST', '/api/v2/firewall/alias', data=data_alias)
+        return response.json() if response else None
 
+    @handle_errors
     def update_alias(self, data_alias):
-        try:
-            return bool(self.http_request('PATCH', '/api/v2/firewall/alias', data=data_alias))
-        except Exception as e:
-            demisto.error(f"{e}")
-            return None
+        return bool(self.http_request('PATCH', '/api/v2/firewall/alias', data=data_alias))
 
+    @handle_errors
     def delete_aliases(self, alias_id):
-        try:
-            if rule_id:
-                path="/api/v2/firewall/alias/?id=" + alias_id
-            else:
-                path="/api/v2/firewall/aliases"
-            return bool(self.http_request('DELETE', path))
-        except Exception as e:
-            demisto.error(f"{e}")
-            return Nonereturn_error(<message>)
+        path = f"/api/v2/firewall/alias/?id={alias_id}" if alias_id else "/api/v2/firewall/aliases"
+        return bool(self.http_request('DELETE', path))
 
+    @handle_errors
     def replace_aliases(self, data_alias):
-        try:
-            return bool(self.http_request('PUT', '/api/v2/firewall/aliases', data=data_alias))
-        except Exception as e:
-            demisto.error(f"{e}")
-            return None
+        return bool(self.http_request('PUT', '/api/v2/firewall/aliases', data=data_alias))
 
-    # Define input data
     def input_data(self, args, is_rule=True):
         if is_rule:
             fields = ["id", "type", "ipprotocol", "protocol", "source", "source_port", "destination", "destination_port", "descr", "statetype", "direction"]
