@@ -82,6 +82,17 @@ class PfSense:
     def replace_aliases(self, data_alias):
         return bool(self.http_request('PUT', '/api/v2/firewall/aliases', data=data_alias))
 
+    @handle_errors
+    def get_apply(self):
+        response = self.http_request('GET', "/api/v2/firewall/apply")
+        return response.json() if response else None
+
+    @handle_errors
+    def create_apply(self):
+        data_apply = {}
+        response = self.http_request('POST', '/api/v2/firewall/apply', data=data_apply)
+        return response.json() if response else None
+
     def input_data(self, args, is_rule=True):
         if is_rule:
             fields = ["id", "type", "ipprotocol", "protocol", "source", "source_port", "destination", "destination_port", "descr", "statetype", "direction"]
@@ -139,6 +150,11 @@ def main():
         elif command == 'pfsense-replace-aliases':
             data_alias = pfsense.input_data(args, is_rule=False)
             return_results(pfsense.replace_aliases(data_alias))
+        elif command == 'pfsense-get-apply':
+            return_results(pfsense.get_apply())
+        elif command == 'pfsense-create-apply':
+            return_results(pfsense.create_apply())
+
 
     except Exception as e:
         raise Exception(f'Error connecting to pfSense: {str(e)}')
