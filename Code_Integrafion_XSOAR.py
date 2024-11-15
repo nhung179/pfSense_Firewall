@@ -28,7 +28,7 @@ class PfSense:
     def http_request(self, method, path, data=None):
         url = f"https://{self.host}:{self.port}{path}"
         response = self.session.request(method=method, url=url, json=data, auth=(self.username, self.password))
-        return response if response.status_code == 200 else None
+        return response if response.status_code == 200 else demisto.info(response)
 
     @handle_errors
     def login(self):
@@ -83,7 +83,7 @@ class PfSense:
         return bool(self.http_request('PUT', '/api/v2/firewall/aliases', data=data_alias))
 
     @handle_errors
-    def get_apply(self):
+    def read_pending_change_status(self):
         response = self.http_request('GET', "/api/v2/firewall/apply")
         return response.json() if response else None
 
@@ -151,7 +151,7 @@ def main():
             data_alias = pfsense.input_data(args, is_rule=False)
             return_results(pfsense.replace_aliases(data_alias))
         elif command == 'pfsense-get-apply':
-            return_results(pfsense.get_apply())
+            return_results(pfsense.read_pending_change_status())
         elif command == 'pfsense-create-apply':
             return_results(pfsense.create_apply())
 
