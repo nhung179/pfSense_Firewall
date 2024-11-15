@@ -28,7 +28,7 @@ class PfSense:
     def http_request(self, method, path, data=None):
         url = f"https://{self.host}:{self.port}{path}"
         response = self.session.request(method=method, url=url, json=data, auth=(self.username, self.password))
-        return response if response.status_code == 200 else demisto.info(response)
+        return response if response.status_code == 200 else demisto.info("Failed to login: {}".format(response.json()))
 
     @handle_errors
     def login(self):
@@ -36,7 +36,7 @@ class PfSense:
 
     @handle_errors
     def get_rules(self, rule_id):
-        path = f"/api/v2/firewall/rule/?id={rule_id}" if alias_id else "/api/v2/firewall/rules"
+        path = f"/api/v2/firewall/rule/?id={rule_id}" if rule_id else "/api/v2/firewall/rules"
         response = self.http_request('GET', path)
         return response.json() if response else None
 
@@ -88,7 +88,7 @@ class PfSense:
         return response.json() if response else None
 
     @handle_errors
-    def create_apply(self):
+    def apply_pending_firewall_changes(self):
         data_apply = {}
         response = self.http_request('POST', '/api/v2/firewall/apply', data=data_apply)
         return response.json() if response else None
@@ -150,10 +150,10 @@ def main():
         elif command == 'pfsense-replace-aliases':
             data_alias = pfsense.input_data(args, is_rule=False)
             return_results(pfsense.replace_aliases(data_alias))
-        elif command == 'pfsense-get-apply':
+        elif command == 'pfsense-read-pending-change-status':
             return_results(pfsense.read_pending_change_status())
-        elif command == 'pfsense-create-apply':
-            return_results(pfsense.create_apply())
+        elif command == 'pfsense-apply-pending-firewall-changes':
+            return_results(pfsense.apply_pending_firewall_changes())
 
 
     except Exception as e:
