@@ -97,13 +97,16 @@ class PfSense:
         if is_rule:
             fields = ["id", "type", "ipprotocol", "protocol", "source", "source_port", "destination", "destination_port", "descr", "statetype", "direction"]
             list_fields = ["interface", "icmptype", "tcp_flags_out_of", "tcp_flags_set"]
+            data = {field: args.get(field) for field in fields}
+            data.update({field: [args.get(field)] for field in list_fields})
         else:
-            fields = ["id", "name", "type"]
-            list_fields = ["address", "detail"]
-
-        data = {field: args.get(field) for field in fields}
-        data.update({field: [args.get(field)] for field in list_fields})
+            fields = ["id", "name", "type","descr", "address", "detail"]
+            data = {field: args.get(field) for field in fields}
         return data
+
+    def split_data(self, data):
+        data_split = data.split(',')
+        return data_split
 
 def main():
     args = demisto.args()
@@ -141,20 +144,25 @@ def main():
             return_results(pfsense.get_aliases(alias_id))
         elif command == 'pfsense-create-alias':
             data_alias = pfsense.input_data(args, is_rule=False)
+            for key in ['address', 'detail']:
+                data_alias[key] = pfsense.split_data(data_alias[key])
             return_results(pfsense.create_alias(data_alias))
         elif command == 'pfsense-update-alias':
             data_alias = pfsense.input_data(args, is_rule=False)
+            for key in ['address', 'detail']:
+                data_alias[key] = pfsense.split_data(data_alias[key])
             return_results(pfsense.update_alias(data_alias))
         elif command == 'pfsense-delete-aliases':
             return_results(pfsense.delete_aliases(alias_id))
         elif command == 'pfsense-replace-aliases':
             data_alias = pfsense.input_data(args, is_rule=False)
+            for key in ['address', 'detail']:
+                data_alias[key] = pfsense.split_data(data_alias[key])
             return_results(pfsense.replace_aliases(data_alias))
         elif command == 'pfsense-read-pending-change-status':
             return_results(pfsense.read_pending_change_status())
         elif command == 'pfsense-apply-pending-firewall-changes':
             return_results(pfsense.apply_pending_firewall_changes())
-
 
     except Exception as e:
         raise Exception(f'Error connecting to pfSense: {str(e)}')
