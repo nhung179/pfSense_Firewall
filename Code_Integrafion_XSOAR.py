@@ -27,9 +27,7 @@ class PfSense:
 
     def http_request(self, method, path, data=None):
         url = f"https://{self.host}:{self.port}{path}"
-        print(8, url)
         response = self.session.request(method=method, url=url, json=data, auth=(self.username, self.password))
-        print(9,response)
         return response if response.status_code == 200 else demisto.info("Failed to login: {}".format(response.json()))
 
     @handle_errors
@@ -64,12 +62,10 @@ class PfSense:
     def get_aliases(self, alias_id):
         path = f"/api/v2/firewall/alias/?id={alias_id}" if alias_id else "/api/v2/firewall/aliases"
         response = self.http_request('GET', path)
-        print(5,response)
         return response.json() if response else None
 
     @handle_errors
     def create_alias(self, data_alias):
-        print(data_alias)
         response = self.http_request('POST', '/api/v2/firewall/alias', data=data_alias)
         return response.json() if response else None
 
