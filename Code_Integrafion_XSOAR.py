@@ -93,6 +93,20 @@ class PfSense:
         response = self.http_request('POST', '/api/v2/firewall/apply', data=data_apply)
         return response.json() if response else None
 
+    @handle_errors
+    def reads_current_firewall_advanced_settings(self):
+        response = self.http_request('GET', "/api/v2/firewall/advanced_settings")
+        return response.json() if response else None
+
+    @handle_errors
+    def updates_current_firewall_advanced_settings(self,args):
+        data_advanced_settings = {
+            "aliasesresolveinterval": int(args.get("aliasesresolveinterval")),
+            "checkaliasesurlcert": (args.get("checkaliasesurlcert").lower() == "True")
+        }
+        response = self.http_request('PATCH', '/api/v2/firewall/advanced_settings', data=data_advanced_settings)
+        return response.json() if response else None
+
     def input_data(self, args, is_rule=True):
         if is_rule:
             fields = ["id", "type", "ipprotocol", "protocol", "source", "source_port", "destination", "destination_port", "descr", "statetype", "direction"]
@@ -163,6 +177,10 @@ def main():
             return_results(pfsense.read_pending_change_status())
         elif command == 'pfsense-apply-pending-firewall-changes':
             return_results(pfsense.apply_pending_firewall_changes())
+        elif command == 'pfsense-reads-firewall-advanced-settings':
+            return_results(pfsense.reads_current_firewall_advanced_settings())
+        elif command == 'pfsense-updates-firewall-advanced-settings':
+            return_results(pfsense.updates_current_firewall_advanced_settings(args))
 
     except Exception as e:
         raise Exception(f'Error connecting to pfSense: {str(e)}')
